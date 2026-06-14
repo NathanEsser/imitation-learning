@@ -1,0 +1,26 @@
+﻿# Ambiente virtual
+venv/
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Artefatos de captura/teste
+*.png
+*.jpg
+*.mp4
+frame.png
+
+# Modelos e checkpoints (grandes — não vão pro git)
+*.pth
+*.pt
+*.pkl
+*.joblib
+
+# IDE / sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
