@@ -18,11 +18,27 @@ class VideoLoop:
 
     def run (self, process_frame = None):
         self.cap = cv2.VideoCapture(self.camera_index)
+        if not self.cap.isOpened():
+            raise RuntimeError(
+                f"Webcam no indice {self.camera_index} nao abriu. "
+                f"Verifique a conexao ou tente outro indice."
+            )
         prev = time.time()
+        fails = 0
 
         try:
             while True:
-                ret, frame =self.cap.read()
+                ret, frame = self.cap.read()
+                #Se vier vários frames finaliza o programa
+                if not ret:
+                    fails += 1
+                    if fails > 30:
+                        raise RuntimeError(
+                            "Camera parou de entregar frames (30 falhas seguidas). "
+                            "Provavel desconexao."
+                        )
+                    continue
+                fails = 0   # frame bom: zera o contador
                 now = time.time()
                 self.frame_times.append(now - prev)
                 prev = now
