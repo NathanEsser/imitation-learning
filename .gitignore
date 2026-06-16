@@ -1,6 +1,8 @@
 ﻿# Ambiente virtual
 venv/
 .venv/
+__pycache__/
+*.task
 
 # Python
 __pycache__/
@@ -24,3 +26,8 @@ frame.png
 .idea/
 .DS_Store
 Thumbs.db
+
+# Dados (podem ficar grandes — avaliar caso a caso)
+*.csv
+data/
+outputs/
