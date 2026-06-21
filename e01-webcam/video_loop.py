@@ -18,6 +18,8 @@ class VideoLoop:
 
     def run (self, process_frame = None):
         self.cap = cv2.VideoCapture(self.camera_index)
+        fps_declarado = self.cap.get(cv2.CAP_PROP_FPS)
+        print(f"A camera declara: {fps_declarado} FPS")
         if not self.cap.isOpened():
             raise RuntimeError(
                 f"Webcam no indice {self.camera_index} nao abriu. "
