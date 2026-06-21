@@ -1,11 +1,4 @@
 import numpy as np
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "e02-hand-tracking"))
-from hand_tracker import HandTracker
-
-pontas = [4, 8, 12, 16, 20]
-medio = [2, 6, 10, 14, 18]
 
 def vetor(p1,p2):
 
@@ -25,6 +18,10 @@ def angulo(p1,p2,p3):
     rad = np.arccos(cos_theta)
     return np.degrees(rad)
 
+
+def distancia(p1, p2):
+    return np.linalg.norm(vetor(p1, p2))
+
 if __name__ == "__main__":
     class P:
         def __init__(self, x, y, z=0):
@@ -32,11 +29,11 @@ if __name__ == "__main__":
             self.y = y
             self.z = z
 
-    p1 = P(1, 0)
-    p2 = P(0, 0)
+    p1 = P(0, 0)
+    p2 = P(3, 4)
     p3 = P(0, 1)
 
-    print(angulo(p1, p2, p3))
+    print(distancia(p1, p2))
     # dedo reto: três pontos quase em linha → perto de 180
     print(angulo(P(1, 0), P(0, 0), P(-1, 0)))   # espera ~180
 
