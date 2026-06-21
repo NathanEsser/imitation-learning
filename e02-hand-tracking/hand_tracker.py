@@ -3,7 +3,6 @@ import cv2
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
-import time
 
 # Conexões (ossos) entre landmarks, agrupadas por dedo.
 FINGER_CHAINS = {
@@ -45,6 +44,7 @@ class HandTracker:
 
         self.last_landmarks = None
         self.last_handedness = None
+        self.frame_count = 0
     
     def __call__(self, frame):
         return self.process(frame)
@@ -55,9 +55,8 @@ class HandTracker:
         rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
 
-        #Modo VIDEO exige um timestamp em milissegundos, sempre CRESCENTE.
-        timestamp_ms = int(time.time() * 1000)
-        result = self.landmarker.detect_for_video(mp_image, timestamp_ms)
+        self.frame_count += 1
+        result = self.landmarker.detect_for_video(mp_image, self.frame_count)
 
         if not result.hand_landmarks:
             self.last_landmarks = None
