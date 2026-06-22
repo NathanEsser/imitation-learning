@@ -1,6 +1,8 @@
 import os
 import sys
 import cv2
+from collections import deque
+import numpy as np
 
 # importar angulo do features.py (mesma pasta)
 from features import angulo, distancia
@@ -12,6 +14,12 @@ from hand_tracker import HandTracker
 from video_loop import VideoLoop
 
 tracker = HandTracker()
+hist_pinca = deque(maxlen=100)
+
+# parâmetros do retângulo do gráfico
+GX, GY = 10, 300        # canto superior-esquerdo
+GW, GH = 200, 100       # largura, altura
+PINCA_MIN, PINCA_MAX = 0.0, 1.2   # faixa esperada da pinça
 
 DEDOS = {
     "indicador": (5, 6, 8),
@@ -23,19 +31,25 @@ DEDOS = {
 def process(frame):
     frame = tracker(frame)
     lm = tracker.last_landmarks
-    if lm is not None:                  
-        for i, (nome, (a, b, c)) in enumerate(DEDOS.items()):
-            ang = angulo(lm[a], lm[b], lm[c])
-            y = 110 + i * 40
-            cv2.putText(frame, f"{ang:.0f}", (10, y),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
-            
-        pinca = distancia(lm[4], lm[8])      # ponta polegar → ponta indicador
-        escala = distancia(lm[0], lm[9])     # pulso → base do médio (régua da mão)
-        pinca_norm = pinca / escala
+    if lm is not None:
+        pinca = distancia(lm[4], lm[8]) / distancia(lm[0], lm[9])
+        hist_pinca.append(pinca)
 
-        cv2.putText(frame, f"{pinca_norm:.2f}", (10, 280),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+    # desenha o retângulo de fundo
+    cv2.rectangle(frame, (GX, GY), (GX+GW, GY+GH), (50, 50, 50), -1)
+
+    # converte cada valor do histórico num ponto
+    pontos = []
+    for i, val in enumerate(hist_pinca):
+        x = GX + int(i / hist_pinca.maxlen * GW)
+        val_c = max(PINCA_MIN, min(PINCA_MAX, val))
+        fracao = (val_c - PINCA_MIN) / (PINCA_MAX - PINCA_MIN)
+        y = (GY + GH) - int(fracao * GH)
+        pontos.append((x, y))
+
+    if len(pontos) > 1:
+        cv2.polylines(frame, [np.array(pontos)], False, (0, 255, 0), 2)
+
     return frame
 
 VideoLoop().run(process_frame=process)
